@@ -171,23 +171,21 @@ function config_iran_server {
 
     echo "Updating config.json with Kharej IP: $kharej_ip and SNI: $sni"
 
-    jq --arg address "$kharej_ip" '.nodes[] | select(.name == "kharej_inbound").settings.address = $address' "$dest_file" > temp.json && mv temp.json "$dest_file"
+    jq --arg address "$kharej_ip" \
+       --arg sni "$sni" \
+       '.nodes[] |
+        select(.name == "kharej_inbound").settings.address = $address |
+        select(.name == "reality_dest").settings.address = $sni' \
+       "$dest_file" > temp.json && mv temp.json "$dest_file"
     if [ $? -ne 0 ]; then
-        log_error "Error: Unable to update config.json for kharej_inbound address."
+        log_error "Error: Unable to update config.json."
         show_errors
         read -p "Press enter to retry..."
         config_iran_server
         return
     fi
 
-    jq --arg address "$sni" '.nodes[] | select(.name == "reality_dest").settings.address = $address' "$dest_file" > temp.json && mv temp.json "$dest_file"
-    if [ $? -ne 0 ]; then
-        log_error "Error: Unable to update config.json for reality_dest address."
-        show_errors
-        read -p "Press enter to retry..."
-        config_iran_server
-        return
-    fi
+
 
     echo "config.json updated successfully."
     read -p "Press enter to continue..."
@@ -216,41 +214,23 @@ function config_kharej_server {
 
     echo "Updating config.json with Iran IP: $iran_ip, SNI: $sni, and MUX concurrency: $concurrency"
 
-    jq --arg sni "$sni" '.nodes[] | select(.name == "reality_client").settings.sni = $sni' "$dest_file" > temp.json && mv temp.json "$dest_file"
+    jq --arg sni "$sni" \
+       --arg address "$iran_ip" \
+       --argjson concurrency "$concurrency" \
+       '.nodes[] |
+        select(.name == "reality_client").settings.sni = $sni |
+        select(.name == "h2client").settings.host = $sni |
+        select(.name == "outbound_to_iran").settings.address = $address |
+        select(.name == "h2client").settings.concurrency = $concurrency' \
+       "$dest_file" > temp.json && mv temp.json "$dest_file"
     if [ $? -ne 0 ]; then
-        log_error "Error: Unable to update SNI in reality_client."
+        log_error "Error: Unable to update config.json."
         show_errors
         read -p "Press enter to retry..."
         config_kharej_server
         return
     fi
 
-    jq --arg sni "$sni" '.nodes[] | select(.name == "h2client").settings.host = $sni' "$dest_file" > temp.json && mv temp.json "$dest_file"
-    if [ $? -ne 0 ]; then
-        log_error "Error: Unable to update SNI in h2client."
-        show_errors
-        read -p "Press enter to retry..."
-        config_kharej_server
-        return
-    fi
-
-    jq --arg address "$iran_ip" '.nodes[] | select(.name == "outbound_to_iran").settings.address = $address' "$dest_file" > temp.json && mv temp.json "$dest_file"
-    if [ $? -ne 0 ]; then
-        log_error "Error: Unable to update address in outbound_to_iran."
-        show_errors
-        read -p "Press enter to retry..."
-        config_kharej_server
-        return
-    fi
-
-    jq --argjson concurrency "$concurrency" '.nodes[] | select(.name == "h2client").settings.concurrency = $concurrency' "$dest_file" > temp.json && mv temp.json "$dest_file"
-    if [ $? -ne 0 ]; then
-        log_error "Error: Unable to update concurrency in h2client."
-        show_errors
-        read -p "Press enter to retry..."
-        config_kharej_server
-        return
-    fi
 
     echo "config.json updated successfully."
     read -p "Press enter to continue..."
