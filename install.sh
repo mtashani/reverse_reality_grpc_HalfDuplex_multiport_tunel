@@ -143,7 +143,7 @@ function config_iran_server {
     apt install jq -y
     
     handle_download_and_unzip
-    local github_url="https://raw.githubusercontent.com/$OWNER/$REPO/master/iran_config.json"
+    local github_url="https://raw.githubusercontent.com/mtashani/reverse_reality_grpc_HalfDuplex_multiport_tunel/main/iran_config.json"
     local dest_file="config.json"
 
     echo "Downloading config.json from $github_url..."
@@ -182,7 +182,7 @@ function config_kharej_server {
     clear
     display_logo
     handle_download_and_unzip
-    local github_url="https://raw.githubusercontent.com/$OWNER/$REPO/master/khrej_config.json"
+    local github_url="https://raw.githubusercontent.com/mtashani/reverse_reality_grpc_HalfDuplex_multiport_tunel/main/khrej_config.json"
     local dest_file="config.json"
 
     echo "Downloading config.json from $github_url..."
