@@ -161,7 +161,9 @@ function config_iran_server {
     if [ $? -ne 0 ]; then
         log_error "Error: Unable to download config.json."
         show_errors
-        return 1
+        read -p "Press enter to retry..."
+        config_iran_server
+        return
     fi
 
     read -p "Enter Kharej IPv4: " kharej_ip
@@ -173,24 +175,24 @@ function config_iran_server {
     if [ $? -ne 0 ]; then
         log_error "Error: Unable to update config.json for kharej_inbound address."
         show_errors
-        return 1
+        read -p "Press enter to retry..."
+        config_iran_server
+        return
     fi
 
     jq --arg address "$sni" '.nodes[] | select(.name == "reality_dest").settings.address = $address' "$dest_file" > temp.json && mv temp.json "$dest_file"
     if [ $? -ne 0 ]; then
         log_error "Error: Unable to update config.json for reality_dest address."
         show_errors
-        return 1
+        read -p "Press enter to retry..."
+        config_iran_server
+        return
     fi
 
     echo "config.json updated successfully."
-    show_errors
     read -p "Press enter to continue..."
     main_menu
 }
-
-
-
 
 function config_kharej_server {
     display_logo
@@ -203,7 +205,9 @@ function config_kharej_server {
     if [ $? -ne 0 ]; then
         log_error "Error: Unable to download config.json."
         show_errors
-        return 1
+        read -p "Press enter to retry..."
+        config_kharej_server
+        return
     fi
 
     read -p "Enter Iran IPv4: " iran_ip
@@ -216,35 +220,43 @@ function config_kharej_server {
     if [ $? -ne 0 ]; then
         log_error "Error: Unable to update SNI in reality_client."
         show_errors
-        return 1
+        read -p "Press enter to retry..."
+        config_kharej_server
+        return
     fi
 
     jq --arg sni "$sni" '.nodes[] | select(.name == "h2client").settings.host = $sni' "$dest_file" > temp.json && mv temp.json "$dest_file"
     if [ $? -ne 0 ]; then
         log_error "Error: Unable to update SNI in h2client."
         show_errors
-        return 1
+        read -p "Press enter to retry..."
+        config_kharej_server
+        return
     fi
 
     jq --arg address "$iran_ip" '.nodes[] | select(.name == "outbound_to_iran").settings.address = $address' "$dest_file" > temp.json && mv temp.json "$dest_file"
     if [ $? -ne 0 ]; then
         log_error "Error: Unable to update address in outbound_to_iran."
         show_errors
-        return 1
+        read -p "Press enter to retry..."
+        config_kharej_server
+        return
     fi
 
     jq --argjson concurrency "$concurrency" '.nodes[] | select(.name == "h2client").settings.concurrency = $concurrency' "$dest_file" > temp.json && mv temp.json "$dest_file"
     if [ $? -ne 0 ]; then
         log_error "Error: Unable to update concurrency in h2client."
         show_errors
-        return 1
+        read -p "Press enter to retry..."
+        config_kharej_server
+        return
     fi
 
     echo "config.json updated successfully."
-    show_errors
     read -p "Press enter to continue..."
     main_menu
 }
+
 
 setup_waterwall_service() {
     cat > /etc/systemd/system/waterwall.service << EOF
