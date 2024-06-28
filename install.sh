@@ -204,24 +204,28 @@ function config_kharej_server {
     jq --arg sni "$sni" '.nodes[] | select(.name == "reality_client") .settings.sni = $sni' "$dest_file" > temp.json && mv temp.json "$dest_file"
     if [ $? -ne 0 ]; then
       echo "Error: Unable to update SNI in reality_client."
+      sleep 1
       return 1
     fi
 
     jq --arg sni "$sni" '.nodes[] | select(.name == "h2client") .settings.host = $sni' "$dest_file" > temp.json && mv temp.json "$dest_file"
     if [ $? -ne 0 ]; then
       echo "Error: Unable to update SNI in h2client."
+      sleep 1
       return 1
     fi
 
     jq --arg address "$iran_ip" '.nodes[] | select(.name == "outbound_to_iran") .settings.address = $address' "$dest_file" > temp.json && mv temp.json "$dest_file"
     if [ $? -ne 0 ]; then
       echo "Error: Unable to update address in outbound_to_iran."
+      sleep 1
       return 1
     fi
 
     jq --argjson concurrency "$concurrency" '.nodes[] | select(.name == "h2client") .settings.concurrency = $concurrency' "$dest_file" > temp.json && mv temp.json "$dest_file"
     if [ $? -ne 0 ]; then
       echo "Error: Unable to update concurrency in h2client."
+      sleep 1
       return 1
     fi
 
