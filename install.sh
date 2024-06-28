@@ -173,10 +173,10 @@ function config_iran_server {
 
     jq --arg address "$kharej_ip" \
        --arg sni "$sni" \
-       '.nodes[] |
-        select(.name == "kharej_inbound").settings.address = $address |
-        select(.name == "reality_dest").settings.address = $sni' \
+       '.nodes |= map(if .name == "kharej_inbound" then .settings.address = $address else . end) |
+        .nodes |= map(if .name == "reality_dest" then .settings.address = $sni else . end)' \
        "$dest_file" > temp.json && mv temp.json "$dest_file"
+
     if [ $? -ne 0 ]; then
         log_error "Error: Unable to update config.json."
         show_errors
@@ -217,12 +217,12 @@ function config_kharej_server {
     jq --arg sni "$sni" \
        --arg address "$iran_ip" \
        --argjson concurrency "$concurrency" \
-       '.nodes[] |
-        select(.name == "reality_client").settings.sni = $sni |
-        select(.name == "h2client").settings.host = $sni |
-        select(.name == "outbound_to_iran").settings.address = $address |
-        select(.name == "h2client").settings.concurrency = $concurrency' \
+       '.nodes |= map(if .name == "reality_client" then .settings.sni = $sni else . end) |
+        .nodes |= map(if .name == "h2client" then .settings.host = $sni else . end) |
+        .nodes |= map(if .name == "outbound_to_iran" then .settings.address = $address else . end) |
+        .nodes |= map(if .name == "h2client" then .settings.concurrency = $concurrency else . end)' \
        "$dest_file" > temp.json && mv temp.json "$dest_file"
+       
     if [ $? -ne 0 ]; then
         log_error "Error: Unable to update config.json."
         show_errors
