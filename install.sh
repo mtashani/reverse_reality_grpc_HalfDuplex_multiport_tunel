@@ -135,9 +135,21 @@ function main_menu {
     done
 }
 
+ERROR_LOG=""
+
+log_error() {
+    local msg="$1"
+    ERROR_LOG="$ERROR_LOG$msg\n"
+}
+
+show_errors() {
+    if [ -n "$ERROR_LOG" ]; then
+        echo -e "\nErrors encountered:"
+        echo -e "$ERROR_LOG"
+    fi
+}
 
 function config_iran_server {
-    clear
     display_logo
     
     handle_download_and_unzip
@@ -147,7 +159,8 @@ function config_iran_server {
     echo "Downloading config.json from $github_url..."
     wget -q -O "$dest_file" "$github_url"
     if [ $? -ne 0 ]; then
-        echo "Error: Unable to download config.json."
+        log_error "Error: Unable to download config.json."
+        show_errors
         return 1
     fi
 
@@ -158,20 +171,20 @@ function config_iran_server {
 
     jq --arg address "$kharej_ip" '.nodes[] | select(.name == "kharej_inbound").settings.address = $address' "$dest_file" > temp.json && mv temp.json "$dest_file"
     if [ $? -ne 0 ]; then
-        echo "Error: Unable to update config.json for kharej_inbound address."
-        sleep 1
+        log_error "Error: Unable to update config.json for kharej_inbound address."
+        show_errors
         return 1
     fi
 
     jq --arg address "$sni" '.nodes[] | select(.name == "reality_dest").settings.address = $address' "$dest_file" > temp.json && mv temp.json "$dest_file"
     if [ $? -ne 0 ]; then
-        echo "Error: Unable to update config.json for reality_dest address."
-        sleep 1
+        log_error "Error: Unable to update config.json for reality_dest address."
+        show_errors
         return 1
     fi
 
     echo "config.json updated successfully."
-
+    show_errors
     read -p "Press enter to continue..."
     main_menu
 }
