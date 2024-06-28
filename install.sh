@@ -193,7 +193,6 @@ function config_iran_server {
 
 
 function config_kharej_server {
-    clear
     display_logo
     handle_download_and_unzip
     local github_url="https://raw.githubusercontent.com/mtashani/reverse_reality_grpc_HalfDuplex_multiport_tunel/main/khrej_config.json"
@@ -202,52 +201,49 @@ function config_kharej_server {
     echo "Downloading config.json from $github_url..."
     wget -q -O "$dest_file" "$github_url"
     if [ $? -ne 0 ]; then
-      echo "Error: Unable to download config.json."
-      return 1
+        log_error "Error: Unable to download config.json."
+        show_errors
+        return 1
     fi
+
     read -p "Enter Iran IPv4: " iran_ip
     read -p "Please enter your Sni. (It is better to use internal sites with ir domain): " sni
     read -p "Enter your MUX concurrency (For a large number of users, a larger number should be used, such as 128 and 256): " concurrency
 
-    echo "Iran IP: $iran_ip"
-    echo "sni: $sni"
-    echo "Mux concurrency: $concurrency"
+    echo "Updating config.json with Iran IP: $iran_ip, SNI: $sni, and MUX concurrency: $concurrency"
 
-
-    jq --arg sni "$sni" '.nodes[] | select(.name == "reality_client") .settings.sni = $sni' "$dest_file" > temp.json && mv temp.json "$dest_file"
+    jq --arg sni "$sni" '.nodes[] | select(.name == "reality_client").settings.sni = $sni' "$dest_file" > temp.json && mv temp.json "$dest_file"
     if [ $? -ne 0 ]; then
-      echo "Error: Unable to update SNI in reality_client."
-      sleep 1
-      return 1
+        log_error "Error: Unable to update SNI in reality_client."
+        show_errors
+        return 1
     fi
 
-    jq --arg sni "$sni" '.nodes[] | select(.name == "h2client") .settings.host = $sni' "$dest_file" > temp.json && mv temp.json "$dest_file"
+    jq --arg sni "$sni" '.nodes[] | select(.name == "h2client").settings.host = $sni' "$dest_file" > temp.json && mv temp.json "$dest_file"
     if [ $? -ne 0 ]; then
-      echo "Error: Unable to update SNI in h2client."
-      sleep 1
-      return 1
+        log_error "Error: Unable to update SNI in h2client."
+        show_errors
+        return 1
     fi
 
-    jq --arg address "$iran_ip" '.nodes[] | select(.name == "outbound_to_iran") .settings.address = $address' "$dest_file" > temp.json && mv temp.json "$dest_file"
+    jq --arg address "$iran_ip" '.nodes[] | select(.name == "outbound_to_iran").settings.address = $address' "$dest_file" > temp.json && mv temp.json "$dest_file"
     if [ $? -ne 0 ]; then
-      echo "Error: Unable to update address in outbound_to_iran."
-      sleep 1
-      return 1
+        log_error "Error: Unable to update address in outbound_to_iran."
+        show_errors
+        return 1
     fi
 
-    jq --argjson concurrency "$concurrency" '.nodes[] | select(.name == "h2client") .settings.concurrency = $concurrency' "$dest_file" > temp.json && mv temp.json "$dest_file"
+    jq --argjson concurrency "$concurrency" '.nodes[] | select(.name == "h2client").settings.concurrency = $concurrency' "$dest_file" > temp.json && mv temp.json "$dest_file"
     if [ $? -ne 0 ]; then
-      echo "Error: Unable to update concurrency in h2client."
-      sleep 1
-      return 1
+        log_error "Error: Unable to update concurrency in h2client."
+        show_errors
+        return 1
     fi
 
     echo "config.json updated successfully."
-
+    show_errors
     read -p "Press enter to continue..."
     main_menu
-    
-
 }
 
 setup_waterwall_service() {
