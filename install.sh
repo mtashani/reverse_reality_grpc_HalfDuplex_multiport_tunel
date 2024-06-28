@@ -59,8 +59,11 @@ get_latest_release_url() {
   echo "$asset_url"
 }
 
-# Function to handle download and unzip process
 handle_download_and_unzip() {
+  mkdir /root/RRT
+  cd /root/RRT
+  apt install unzip -y
+  apt install jq -y
   local url=$(get_latest_release_url)
   if [ $? -ne 0 ]; then
     exit 1
@@ -69,10 +72,10 @@ handle_download_and_unzip() {
   core_config
 }
 
-# Function to configure core.json based on user input
+
 core_config() {
-  # Download core.json from GitHub
-  local github_url="https://raw.githubusercontent.com/$OWNER/$REPO/master/core.json"
+
+  local github_url="https://raw.githubusercontent.com/mtashani/reverse_reality_grpc_HalfDuplex_multiport_tunel/main/core.json"
   local dest_file="core.json"
 
   echo "Downloading core.json from $github_url..."
@@ -82,15 +85,14 @@ core_config() {
     return 1
   fi
 
-  # Prompt user for configuration inputs
   read -p "Enter number of workers (default 0): " workers
   read -p "Enter ram-profile (minimal/client/server, default server): " ram_profile
 
-  # Set default values if user input is empty
+
   workers=${workers:-0}
   ram_profile=${ram_profile:-server}
 
-  # Validate ram-profile input
+
   case $ram_profile in
     minimal|client|server)
       ;;
@@ -100,7 +102,7 @@ core_config() {
       ;;
   esac
 
-  # Update core.json with user inputs
+
   jq ".misc.workers = $workers | .misc.\"ram-profile\" = \"$ram_profile\"" "$dest_file" > temp.json && mv temp.json "$dest_file"
 
   echo "core.json updated successfully."
@@ -137,10 +139,6 @@ function main_menu {
 function config_iran_server {
     clear
     display_logo
-    mkdir /root/RRT
-    cd /root/RRT
-    apt install unzip -y
-    apt install jq -y
     
     handle_download_and_unzip
     local github_url="https://raw.githubusercontent.com/mtashani/reverse_reality_grpc_HalfDuplex_multiport_tunel/main/iran_config.json"
