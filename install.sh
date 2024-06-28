@@ -147,25 +147,25 @@ function config_iran_server {
     echo "Downloading config.json from $github_url..."
     wget -q -O "$dest_file" "$github_url"
     if [ $? -ne 0 ]; then
-      echo "Error: Unable to download config.json."
-      return 1
+        echo "Error: Unable to download config.json."
+        return 1
     fi
+
     read -p "Enter Kharej IPv4: " kharej_ip
     read -p "Please enter your Sni. (It is better to use internal sites with ir domain): " sni
 
-    echo "Kharej IP: $kharej_ip"
-    echo "sni: $sni"
+    echo "Updating config.json with Kharej IP: $kharej_ip and SNI: $sni"
 
-    jq --arg address "$kharej_ip" '.nodes[] | select(.name == "kharej_inbound") .settings.address = $address' "$dest_file" > temp.json && mv temp.json "$dest_file"
+    jq --arg address "$kharej_ip" '.nodes[] | select(.name == "kharej_inbound").settings.address = $address' "$dest_file" > temp.json && mv temp.json "$dest_file"
     if [ $? -ne 0 ]; then
-      echo "Error: Unable to update config.json for kharej_inbound address."
-      return 1
+        echo "Error: Unable to update config.json for kharej_inbound address."
+        return 1
     fi
 
-    jq --arg address "$sni" '.nodes[] | select(.name == "reality_dest") .settings.address = $address' "$dest_file" > temp.json && mv temp.json "$dest_file"
+    jq --arg address "$sni" '.nodes[] | select(.name == "reality_dest").settings.address = $address' "$dest_file" > temp.json && mv temp.json "$dest_file"
     if [ $? -ne 0 ]; then
-      echo "Error: Unable to update config.json for reality_dest address."
-      return 1
+        echo "Error: Unable to update config.json for reality_dest address."
+        return 1
     fi
 
     echo "config.json updated successfully."
@@ -173,6 +173,7 @@ function config_iran_server {
     read -p "Press enter to continue..."
     main_menu
 }
+
 
 
 
