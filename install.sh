@@ -159,12 +159,14 @@ function config_iran_server {
     jq --arg address "$kharej_ip" '.nodes[] | select(.name == "kharej_inbound").settings.address = $address' "$dest_file" > temp.json && mv temp.json "$dest_file"
     if [ $? -ne 0 ]; then
         echo "Error: Unable to update config.json for kharej_inbound address."
+        sleep 1
         return 1
     fi
 
     jq --arg address "$sni" '.nodes[] | select(.name == "reality_dest").settings.address = $address' "$dest_file" > temp.json && mv temp.json "$dest_file"
     if [ $? -ne 0 ]; then
         echo "Error: Unable to update config.json for reality_dest address."
+        sleep 1
         return 1
     fi
 
