@@ -190,6 +190,7 @@ function config_iran_server {
     echo "config.json updated successfully."
 
     setup_waterwall_service
+    systemctl status waterwall
     read -p "Press enter to continue..."
     main_menu
 }
@@ -237,6 +238,7 @@ function config_kharej_server {
     echo "config.json updated successfully."
 
     setup_waterwall_service
+    systemctl status waterwall
     read -p "Press enter to continue..."
     main_menu
 }
