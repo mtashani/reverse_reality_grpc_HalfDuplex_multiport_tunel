@@ -188,6 +188,8 @@ function config_iran_server {
 
 
     echo "config.json updated successfully."
+
+    setup_waterwall_service
     read -p "Press enter to continue..."
     main_menu
 }
@@ -222,7 +224,7 @@ function config_kharej_server {
         .nodes |= map(if .name == "outbound_to_iran" then .settings.address = $address else . end) |
         .nodes |= map(if .name == "h2client" then .settings.concurrency = $concurrency else . end)' \
        "$dest_file" > temp.json && mv temp.json "$dest_file"
-       
+
     if [ $? -ne 0 ]; then
         log_error "Error: Unable to update config.json."
         show_errors
@@ -233,6 +235,8 @@ function config_kharej_server {
 
 
     echo "config.json updated successfully."
+
+    setup_waterwall_service
     read -p "Press enter to continue..."
     main_menu
 }
